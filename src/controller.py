@@ -1,6 +1,7 @@
 from binance import Client
 import pandas as pd
 import os
+import sqlite3
 # from typing import List
 
 class controller:
@@ -30,3 +31,23 @@ class controller:
         frame = frame.astype(float)
 
         return frame
+
+
+    def sqlUpdate(self):
+        con = sqlite3.connect('H:\SQLite\SQLiteData\historical_klines.db')
+        cur = con.cursor()
+        table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
+        print('table name = ' + table_name)
+
+        for row in cur.execute('''
+        SELECT time, open, high, low, close, volume
+        FROM btcbusd_4h_historical
+        LIMIT 10
+        '''):
+            print(row)
+
+        # df_insert = self.getKlines()
+        # df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
+        # con.commit()
+
+        con.close

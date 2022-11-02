@@ -5,10 +5,10 @@ import sqlite3
 # from typing import List
 
 class controller:
-    def __init__(self, symbol, interval, lookback):
+    def __init__(self, symbol: str, interval: str, lookback_string: str):
         self.symbol = symbol
         self.interval = interval
-        self.lookback = lookback
+        self.lookback_string = lookback_string
 
     
     def binanceClient(self):
@@ -23,7 +23,7 @@ class controller:
 
     def getKlines(self):
         client = self.binanceClient()
-        frame = pd.DataFrame(client.get_historical_klines(self.symbol, self.interval, self.lookback))
+        frame = pd.DataFrame(client.get_historical_klines(self.symbol, self.interval, self.lookback_string))
         frame = frame.iloc[:,:6]
         frame.columns = ['time','open','high','low','close','volume']
         frame = frame.set_index('time')
@@ -35,19 +35,19 @@ class controller:
 
     def sqlUpdate(self):
         con = sqlite3.connect('H:\SQLite\SQLiteData\historical_klines.db')
-        cur = con.cursor()
         table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
         print('table name = ' + table_name)
 
-        for row in cur.execute('''
-        SELECT time, open, high, low, close, volume
-        FROM btcbusd_4h_historical
-        LIMIT 10
-        '''):
-            print(row)
+        # cur = con.cursor()
+        # for row in cur.execute('''
+        # SELECT time, open, high, low, close, volume
+        # FROM btcbusd_4h_historical
+        # LIMIT 10
+        # '''):
+        #     print(row)
 
-        # df_insert = self.getKlines()
-        # df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
-        # con.commit()
+        df_insert = self.getKlines()
+        df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
+        con.commit()
 
         con.close

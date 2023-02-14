@@ -1,9 +1,22 @@
-from sklearn.ensemble import RandomForestClassifier
 from binance import Client
 import pandas as pd
 import os
 import sqlite3
-# from typing import List
+from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_variance_score, r2_score 
+from sklearn.metrics import mean_poisson_deviance, mean_gamma_deviance, accuracy_score
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, Dropout
+# from tensorflow.keras.layers import LSTM
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.layers import LSTM
+import matplotlib.pyplot as plt
+from itertools import cycle
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
 
 class controller:
     def __init__(self, symbol: str, interval: str, lookback_string: str):
@@ -54,7 +67,7 @@ class controller:
         con.close
 
     
-    def sklearnExample(delf):
+    def lstmPrediction(delf):
 
         test_data = pd.read_csv("/kaggle/input/titanic/test.csv")
 

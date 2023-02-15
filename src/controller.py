@@ -8,9 +8,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_v
 from sklearn.metrics import mean_poisson_deviance, mean_gamma_deviance, accuracy_score
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense, Dropout
-# from tensorflow.keras.layers import LSTM
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers import LSTM
@@ -112,7 +109,6 @@ class controller:
         
         # seting the percentage data sets for training 60% and testing 40%
         training_size = int(len(close_values)* 0.60)
-        
         # test_size = len(close_values) - training_size
         training_data = close_values[0:training_size,:]
         test_data = close_values[training_size:len(close_values),:1]
@@ -120,8 +116,7 @@ class controller:
         print('train data = ', test_data.shape)
         
         # create the dataset matrix
-        # time_step = 15
-        time_step = 150
+        time_step = 120
         X_training, y_training = self.dataset_matrix(training_data, time_step)
         X_test, y_test = self.dataset_matrix(test_data, time_step)
         print('X_training = ', X_training.shape)
@@ -142,7 +137,7 @@ class controller:
         model.compile(loss="mean_squared_error", optimizer="adam")
         
         # next line can be used to plot the training and validation loss
-        # history = model.fit(X_training, y_training, validation_data=(X_test, y_test), epochs=200, batch_size=32, verbose=1)
+        history = model.fit(X_training, y_training, validation_data=(X_test, y_test), epochs=200, batch_size=32, verbose=1)
 
         # executing the prediction
         training_predict = model.predict(X_training)
@@ -161,7 +156,6 @@ class controller:
         print('Training data RMSE: ', math.sqrt(mean_squared_error(original_ytraining,training_predict)))
         print('Training data MSE: ', mean_squared_error(original_ytraining,training_predict))
         print('Training data MAE: ', mean_absolute_error(original_ytraining,training_predict))
-        print("-------------------------------------------------------------------------------------")
         print("Test data RMSE: ", math.sqrt(mean_squared_error(original_ytest,test_predict)))
         print("Test data MSE: ", mean_squared_error(original_ytest,test_predict))
         print("Test data MAE: ", mean_absolute_error(original_ytest,test_predict))

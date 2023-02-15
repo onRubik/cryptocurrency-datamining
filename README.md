@@ -6,6 +6,6 @@
 - Use of TensorFlow 2.10 , Keras and sklearn
 - Use of Python 3.9.0
 
-###Links
+### Links
 This work is based on MEET NAGADIA notebook in kaggle. Please visit:
 `<link>` : <https://www.kaggle.com/code/meetnagadia/bitcoin-price-prediction-using-lstm>

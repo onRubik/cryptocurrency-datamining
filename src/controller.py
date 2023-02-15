@@ -120,7 +120,8 @@ class controller:
         print('train data = ', test_data.shape)
         
         # create the dataset matrix
-        time_step = 15
+        # time_step = 15
+        time_step = 150
         X_training, y_training = self.dataset_matrix(training_data, time_step)
         X_test, y_test = self.dataset_matrix(test_data, time_step)
         print('X_training = ', X_training.shape)
@@ -176,16 +177,15 @@ class controller:
         # regression Loss Mean Gamma deviance regression loss (MGD) and Mean Poisson deviance regression loss (MPD)
         print("Train data MGD: ", mean_gamma_deviance(original_ytraining, training_predict))
         print("Test data MGD: ", mean_gamma_deviance(original_ytest, test_predict))
-        print("----------------------------------------------------------------------")
         print("Train data MPD: ", mean_poisson_deviance(original_ytraining, training_predict))
         print("Test data MPD: ", mean_poisson_deviance(original_ytest, test_predict))
 
+        
+        # print(training_predict)
+        # print(test_predict)
         # graph between original values VS predicted
         look_back=time_step
         trainPredictPlot = np.empty_like(close_values)
-        print('/n')
-        print('training_predict shape = ', training_predict.shape)
-        print('/n')
         trainPredictPlot[:, :] = np.nan
         trainPredictPlot[look_back:len(training_predict) + look_back, :] = training_predict
         print("Training predicted data: ", trainPredictPlot.shape)
@@ -193,9 +193,6 @@ class controller:
         # shift test predictions for plotting
         testPredictPlot = np.empty_like(close_values)
         testPredictPlot[:, :] = np.nan
-        print('/n')
-        print('test_predict shape = ', test_predict.shape)
-        print('/n')
         testPredictPlot[len(training_predict) + (look_back*2) + 1 : len(close_values)-1, :] = test_predict
         print("Test predicted data: ", testPredictPlot.shape)
 
@@ -215,4 +212,5 @@ class controller:
 
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
-        fig.show()
+        # fig.show()
+        fig.write_image(r'C:\Users\excel\Documents\codeInwinLocal\onRubik-GitHub\cryptocurrency-datamining\img_output\image.png') 

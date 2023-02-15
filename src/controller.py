@@ -47,7 +47,7 @@ class controller:
 
 
     def sqlUpdate(self):
-        con = sqlite3.connect('H:\SQLite\SQLiteData\historical_klines.db')
+        con = sqlite3.connect('<your_db_file_path.db>')
         table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
         print('table name = ' + table_name)
 
@@ -67,7 +67,7 @@ class controller:
         # LIMIT 10
         # '''):
         #     print(row)
-        con = sqlite3.connect('H:\SQLite\SQLiteData\historical_klines.db')
+        con = sqlite3.connect('<your_db_file_path.db>')
         df_read = pd.read_sql_query(
         '''
         SELECT *
@@ -207,4 +207,4 @@ class controller:
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
         # fig.show()
-        fig.write_image(r'C:\Users\excel\Documents\codeInwinLocal\onRubik-GitHub\cryptocurrency-datamining\img_output\image.png') 
+        fig.write_image(r'<your_graph_image_output_path...\img_output\image_name.png>') 

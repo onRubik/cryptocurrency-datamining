@@ -16,7 +16,9 @@ class mainModel:
         # print(df_types)
         # print('\n')
         # print(out)
-        newController.sqlUpdate()
+        # newController.sqlUpdate()
+        # newController.readDb()
+        newController.lstmModel()
 
 
 if __name__ == "__main__":

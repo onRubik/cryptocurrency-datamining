@@ -1,6 +1,9 @@
 # draft file
 draft.py
 
+# screenshots
+*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

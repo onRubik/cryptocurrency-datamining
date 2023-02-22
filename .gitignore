@@ -1,3 +1,5 @@
+# sqlite db
+*.db
 # draft file
 draft.py
 

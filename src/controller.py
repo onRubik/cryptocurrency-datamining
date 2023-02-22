@@ -1,3 +1,5 @@
+import platform
+from pathlib import Path
 import math
 import numpy as np
 from binance import Client
@@ -17,11 +19,23 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
+
 class controller:
-    def __init__(self, symbol: str, interval: str, lookback_string: str):
+    def __init__(self, symbol: str, interval: str, lookback_string: str, image_output_name: str):
         self.symbol = symbol
         self.interval = interval
         self.lookback_string = lookback_string
+        self.image_output_name = image_output_name
+
+    
+    def imgFolder(self):
+        os_type = platform.system()
+        if os_type == 'Windows':
+            project_path = os.path.dirname(__file__)
+        elif os_type == 'Linux':
+            project_path = os.path.dirname(os.path.abspath(__file__))
+
+        return project_path, os_type
 
     
     def binanceClient(self):
@@ -47,14 +61,22 @@ class controller:
 
 
     def sqlUpdate(self):
-        con = sqlite3.connect('<your_db_file_path.db>')
+        db_path, os_type = self.imgFolder()
+        db_path = Path(db_path)
+        db_path = db_path.parent
+
+        if os_type == 'Windows':
+            db_path_fix = str(db_path) + '\\historical_klines.db'
+        if os_type == 'Linux':
+            db_path_fix = str(db_path) + '/historical_klines.db'
+
+        con = sqlite3.connect(db_path_fix)
         table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
         print('table name = ' + table_name)
 
         df_insert = self.getKlines()
         df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
         con.commit()
-
         con.close()
 
 
@@ -67,7 +89,17 @@ class controller:
         # LIMIT 10
         # '''):
         #     print(row)
-        con = sqlite3.connect('<your_db_file_path.db>')
+
+        db_path, os_type = self.imgFolder()
+        db_path = Path(db_path)
+        db_path = db_path.parent
+
+        if os_type == 'Windows':
+            db_path_fix = str(db_path) + '\\historical_klines.db'
+        if os_type == 'Linux':
+            db_path_fix = str(db_path) + '/historical_klines.db'
+
+        con = sqlite3.connect(db_path_fix)
         df_read = pd.read_sql_query(
         '''
         SELECT *
@@ -76,9 +108,7 @@ class controller:
         )
         ORDER BY time ASC
         ;''', con)
-        # print(df_read)
         con.commit()
-
         con.close()
 
         return df_read
@@ -95,6 +125,14 @@ class controller:
 
 
     def lstmModel(self):
+        img_output, os_type = self.imgFolder()
+        img_output = Path(img_output)
+        img_output = img_output.parent
+
+        if os_type == 'Windows':
+            img_output_fix = str(img_output) + '\\img_output\\' + self.image_output_name
+        if os_type == 'Linux':
+            img_output_fix = str(img_output) + '/img_output/' + self.image_output_name
         # considering only a year of data
         # target prediction data is the close value per date
 
@@ -207,4 +245,4 @@ class controller:
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
         # fig.show()
-        fig.write_image(r'<your_graph_image_output_path...\img_output\image_name.png>') 
+        fig.write_image(img_output_fix)

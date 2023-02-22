@@ -32,7 +32,7 @@ unit-test-job:   # This job runs in the test stage.
   image: python
   script:
     - echo "Running test example"
-    - python src test.py
+    - python ./src/test.py
     - sleep 60
 
 # lint-test-job:   # This job also runs in the test stage.

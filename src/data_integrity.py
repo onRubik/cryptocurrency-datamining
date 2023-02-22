@@ -38,6 +38,3 @@ class dataIntegrity:
 
     def missingIndexUtcnow(self):
         pass
-
-
-# dataIntegrity('','','','').testPaths()

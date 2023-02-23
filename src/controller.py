@@ -1,4 +1,5 @@
-import platform
+# import platform
+from data_integrity import dataIntegrity
 from pathlib import Path
 import math
 import numpy as np
@@ -28,16 +29,6 @@ class controller:
         self.image_output_name = image_output_name
 
     
-    def imgFolder(self):
-        os_type = platform.system()
-        if os_type == 'Windows':
-            project_path = os.path.dirname(__file__)
-        elif os_type == 'Linux':
-            project_path = os.path.dirname(os.path.abspath(__file__))
-
-        return project_path, os_type
-
-    
     def binanceClient(self):
         ## to set a temporal environment variable with powershell:
         ## use $Env:binance_api_key = "" $Env:binance_api_secret_key = ""
@@ -61,7 +52,7 @@ class controller:
 
 
     def sqlUpdate(self):
-        db_path, os_type = self.imgFolder()
+        db_path, os_type = dataIntegrity.imgFolder()
         db_path = Path(db_path)
         db_path = db_path.parent
 
@@ -90,7 +81,7 @@ class controller:
         # '''):
         #     print(row)
 
-        db_path, os_type = self.imgFolder()
+        db_path, os_type = dataIntegrity.imgFolder()
         db_path = Path(db_path)
         db_path = db_path.parent
 
@@ -125,7 +116,7 @@ class controller:
 
 
     def lstmModel(self):
-        img_output, os_type = self.imgFolder()
+        img_output, os_type = dataIntegrity.imgFolder()
         img_output = Path(img_output)
         img_output = img_output.parent
 

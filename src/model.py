@@ -5,7 +5,7 @@ class mainModel:
     def runModel(self):
         symbol = 'BTCBUSD'
         interval = '4h'
-        lookback_val = '4'
+        lookback_val = '1'
         lookback_frame = 'years'
         lookback_utc_adjustment = 'UTC-7'
         lookback_string = lookback_val + ' ' + lookback_frame + ' ago ' + lookback_utc_adjustment

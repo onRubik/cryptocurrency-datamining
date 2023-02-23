@@ -1,4 +1,5 @@
-from controller import controller
+# from controller import controller
+import platform
 from pathlib import Path
 import os
 
@@ -11,9 +12,19 @@ class dataIntegrity:
         self.lookback_utc_adjustment = lookback_utc_adjustment
 
 
+    def imgFolder(self):
+        os_type = platform.system()
+        if os_type == 'Windows':
+            project_path = os.path.dirname(__file__)
+        elif os_type == 'Linux':
+            project_path = os.path.dirname(os.path.abspath(__file__))
+
+        return project_path, os_type
+    
+    
     def testPaths(self):
         try:
-            project_path, os_type = controller('','','','').imgFolder()
+            project_path, os_type = self.imgFolder()
             project_path = Path(project_path)
             project_path = project_path.parent
             print('\n')

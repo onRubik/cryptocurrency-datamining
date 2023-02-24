@@ -52,7 +52,7 @@ class controller:
 
 
     def sqlUpdate(self):
-        db_path, os_type = dataIntegrity.imgFolder()
+        db_path, os_type = dataIntegrity.imgFolder(self)
         db_path = Path(db_path)
         db_path = db_path.parent
 
@@ -62,7 +62,7 @@ class controller:
             db_path_fix = str(db_path) + '/historical_klines.db'
 
         con = sqlite3.connect(db_path_fix)
-        table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
+        table_name = str('stage_' + self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
         print('table name = ' + table_name)
 
         df_insert = self.getKlines()
@@ -81,7 +81,7 @@ class controller:
         # '''):
         #     print(row)
 
-        db_path, os_type = dataIntegrity.imgFolder()
+        db_path, os_type = dataIntegrity.imgFolder(self)
         db_path = Path(db_path)
         db_path = db_path.parent
 
@@ -116,7 +116,7 @@ class controller:
 
 
     def lstmModel(self):
-        img_output, os_type = dataIntegrity.imgFolder()
+        img_output, os_type = dataIntegrity.imgFolder(self)
         img_output = Path(img_output)
         img_output = img_output.parent
 

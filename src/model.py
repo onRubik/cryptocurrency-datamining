@@ -12,7 +12,7 @@ class mainModel:
         image_output_name = 'image.png'
 
         newController = controller(symbol, interval, lookback_string, image_output_name)
-        # newController.sqlUpdate()
+        newController.sqlUpdate()
         # newController.lstmModel()
         
 

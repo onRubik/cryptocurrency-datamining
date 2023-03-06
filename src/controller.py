@@ -62,12 +62,40 @@ class controller:
             db_path_fix = str(db_path) + '/historical_klines.db'
 
         con = sqlite3.connect(db_path_fix)
-        table_name = str('stage_' + self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
-        print('table name = ' + table_name)
+        stage_table_name = str('stage_' + self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
+        table_name = stage_table_name[6:]
+        print('table name = ' + stage_table_name)
+
+        cur = con.cursor()
+        for row in cur.execute('''
+        select
+        case 
+            when exists (select 1 from stage_btcbusd_4h_historical) 
+            then 1 
+            else 0
+        end
+        '''):
+            print(int(row[0]))
+        
+        if int(row[0]) == 1:
+            cur.execute('delete from ' + stage_table_name)
+            con.commit()
 
         df_insert = self.getKlines()
-        df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
+        df_insert.to_sql(stage_table_name, con, if_exists='append', index_label='time')
         con.commit()
+
+        cur.execute('''
+        insert into btcbusd_4h_historical(time, open, high, low, close, volume)
+        select *
+        from stage_btcbusd_4h_historical
+        where time not in (
+            select time
+            from btcbusd_4h_historical
+        )
+        ''')
+        con.commit()
+
         con.close()
 
 

@@ -1,9 +1,11 @@
 # sqlite db
 *.db
-# draft file
+# draft files
 draft.py
+fta.py
 
-# screenshots
+# screenshots and dot files
+*.dot
 *.png
 
 # Byte-compiled / optimized / DLL files

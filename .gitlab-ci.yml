@@ -1,0 +1,12 @@
+stages:          # List of stages for jobs, and their order of execution
+#   - build
+  - test
+#   - deploy
+
+unit-test-job:   # This job runs in the test stage.
+  stage: test
+  image: python
+  script:
+    - echo "Running test example"
+    - python ./src/test.py
+    - sleep 60

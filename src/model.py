@@ -5,14 +5,16 @@ class mainModel:
     def runModel(self):
         symbol = 'BTCBUSD'
         interval = '4h'
-        lookback_val = '4'
+        lookback_val = '1'
         lookback_frame = 'years'
         lookback_utc_adjustment = 'UTC-7'
         lookback_string = lookback_val + ' ' + lookback_frame + ' ago ' + lookback_utc_adjustment
+        image_output_name = 'image.png'
 
-        newController = controller(symbol, interval, lookback_string)
+        newController = controller(symbol, interval, lookback_string, image_output_name)
         newController.sqlUpdate()
-        newController.lstmModel()
+        # newController.lstmModel()
+        
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+from data_integrity import dataIntegrity
+from pathlib import Path
 import math
 import numpy as np
 from binance import Client
@@ -17,11 +19,13 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
+
 class controller:
-    def __init__(self, symbol: str, interval: str, lookback_string: str):
+    def __init__(self, symbol: str, interval: str, lookback_string: str, image_output_name: str):
         self.symbol = symbol
         self.interval = interval
         self.lookback_string = lookback_string
+        self.image_output_name = image_output_name
 
     
     def binanceClient(self):
@@ -47,19 +51,55 @@ class controller:
 
 
     def sqlUpdate(self):
-        con = sqlite3.connect('<your_db_file_path.db>')
-        table_name = str(self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
-        print('table name = ' + table_name)
+        db_path, os_type = dataIntegrity.imgFolder(self)
+        db_path = Path(db_path)
+        db_path = db_path.parent
+
+        if os_type == 'Windows':
+            db_path_fix = str(db_path) + '\\historical_klines.db'
+        if os_type == 'Linux':
+            db_path_fix = str(db_path) + '/historical_klines.db'
+
+        con = sqlite3.connect(db_path_fix)
+        stage_table_name = str('stage_' + self.symbol).lower() + '_' + str(self.interval).lower() + '_historical'
+        table_name = stage_table_name[6:]
+        print('table name = ' + stage_table_name)
+
+        cur = con.cursor()
+        for row in cur.execute('''
+        select
+        case 
+            when exists (select 1 from stage_btcbusd_4h_historical) 
+            then 1 
+            else 0
+        end
+        '''):
+            print(int(row[0]))
+        
+        if int(row[0]) == 1:
+            cur.execute('delete from ' + stage_table_name)
+            con.commit()
 
         df_insert = self.getKlines()
-        df_insert.to_sql(table_name, con, if_exists='append', index_label='time')
+        df_insert.to_sql(stage_table_name, con, if_exists='append', index_label='time')
+        con.commit()
+
+        cur.execute('''
+        insert into btcbusd_4h_historical(time, open, high, low, close, volume)
+        select *
+        from stage_btcbusd_4h_historical
+        where time not in (
+            select time
+            from btcbusd_4h_historical
+        )
+        ''')
         con.commit()
 
         con.close()
 
 
     def readDb(self):
-        # next commented lines is an example to print an sql query if needed
+        ## next commented lines is an example to print an sql query if needed
         # cur = con.cursor()
         # for row in cur.execute('''
         # SELECT time, open, high, low, close, volume
@@ -67,7 +107,17 @@ class controller:
         # LIMIT 10
         # '''):
         #     print(row)
-        con = sqlite3.connect('<your_db_file_path.db>')
+
+        db_path, os_type = dataIntegrity.imgFolder(self)
+        db_path = Path(db_path)
+        db_path = db_path.parent
+
+        if os_type == 'Windows':
+            db_path_fix = str(db_path) + '\\historical_klines.db'
+        if os_type == 'Linux':
+            db_path_fix = str(db_path) + '/historical_klines.db'
+
+        con = sqlite3.connect(db_path_fix)
         df_read = pd.read_sql_query(
         '''
         SELECT *
@@ -76,9 +126,7 @@ class controller:
         )
         ORDER BY time ASC
         ;''', con)
-        # print(df_read)
         con.commit()
-
         con.close()
 
         return df_read
@@ -95,6 +143,14 @@ class controller:
 
 
     def lstmModel(self):
+        img_output, os_type = dataIntegrity.imgFolder(self)
+        img_output = Path(img_output)
+        img_output = img_output.parent
+
+        if os_type == 'Windows':
+            img_output_fix = str(img_output) + '\\img_output\\' + self.image_output_name
+        if os_type == 'Linux':
+            img_output_fix = str(img_output) + '/img_output/' + self.image_output_name
         # considering only a year of data
         # target prediction data is the close value per date
 
@@ -207,4 +263,4 @@ class controller:
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
         # fig.show()
-        fig.write_image(r'<your_graph_image_output_path...\img_output\image_name.png>') 
+        fig.write_image(img_output_fix)

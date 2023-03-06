@@ -1,4 +1,3 @@
-# import platform
 from data_integrity import dataIntegrity
 from pathlib import Path
 import math
@@ -100,7 +99,7 @@ class controller:
 
 
     def readDb(self):
-        # next commented lines is an example to print an sql query if needed
+        ## next commented lines is an example to print an sql query if needed
         # cur = con.cursor()
         # for row in cur.execute('''
         # SELECT time, open, high, low, close, volume

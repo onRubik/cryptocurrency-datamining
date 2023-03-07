@@ -4,9 +4,10 @@
 draft.py
 fta.py
 
-# screenshots and dot files
+# output files
 *.dot
 *.png
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,1 +1,1 @@
-keep this folder, the project uses it to store output
+keep this folder, the project uses it to store graphs output

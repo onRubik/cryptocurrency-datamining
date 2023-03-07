@@ -21,11 +21,13 @@ from plotly.subplots import make_subplots
 
 
 class controller:
-    def __init__(self, symbol: str, interval: str, lookback_string: str, image_output_name: str):
+    def __init__(self, symbol: str, interval: str, lookback_string: str, image_output_name: str, predict_days: int, flat_file_name: str):
         self.symbol = symbol
         self.interval = interval
         self.lookback_string = lookback_string
         self.image_output_name = image_output_name
+        self.predict_days = predict_days
+        self.flat_file_name = flat_file_name
 
     
     def binanceClient(self):
@@ -149,8 +151,15 @@ class controller:
 
         if os_type == 'Windows':
             img_output_fix = str(img_output) + '\\img_output\\' + self.image_output_name
+            img_output_fix_pred = str(img_output) + '\\img_output\\' + 'predict_' + self.image_output_name
+            img_output_fix_complete = str(img_output) + '\\img_output\\' + 'complete_' + self.image_output_name
+            csv_output = str(img_output) + '\\ff_output\\' + self.flat_file_name
         if os_type == 'Linux':
             img_output_fix = str(img_output) + '/img_output/' + self.image_output_name
+            img_output_fix_pred = str(img_output) + '/img_output/' + 'predict_' + self.image_output_name
+            img_output_fix_complete = str(img_output) + '/img_output/' + 'complete_' + self.image_output_name
+            csv_output = str(img_output) + '/ff_output/' + self.flat_file_name
+
         # considering only a year of data
         # target prediction data is the close value per date
 
@@ -231,8 +240,6 @@ class controller:
         print("Test data MPD: ", mean_poisson_deviance(original_ytest, test_predict))
 
         
-        # print(training_predict)
-        # print(test_predict)
         # graph between original values VS predicted
         look_back=time_step
         trainPredictPlot = np.empty_like(close_values)
@@ -259,8 +266,92 @@ class controller:
         fig.update_layout(title_text='Comparision between original close price vs predicted close price',
             plot_bgcolor='white', font_size=15, font_color='black', legend_title_text='Close Price')
         fig.for_each_trace(lambda t:  t.update(name = next(names)))
-
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
         # fig.show()
         fig.write_image(img_output_fix)
+
+        x_input=test_data[len(test_data)-time_step:].reshape(1,-1)
+        temp_input=list(x_input)
+        temp_input=temp_input[0].tolist()
+
+        lst_output=[]
+        n_steps=time_step
+        i=0
+        pred_days = self.predict_days * 6
+        while(i<pred_days):
+            
+            if(len(temp_input)>time_step):
+                
+                x_input=np.array(temp_input[1:])
+                x_input = x_input.reshape(1,-1)
+                x_input = x_input.reshape((1, n_steps, 1))
+                
+                yhat = model.predict(x_input, verbose=0)
+                temp_input.extend(yhat[0].tolist())
+                temp_input=temp_input[1:]
+            
+                lst_output.extend(yhat.tolist())
+                i=i+1
+                
+            else:
+                
+                x_input = x_input.reshape((1, n_steps,1))
+                yhat = model.predict(x_input, verbose=0)
+                temp_input.extend(yhat[0].tolist())
+                
+                lst_output.extend(yhat.tolist())
+                i=i+1
+                    
+        last_days=np.arange(1,time_step+1)
+        day_pred=np.arange(time_step+1,time_step+pred_days+1)
+
+        temp_mat = np.empty((len(last_days)+pred_days+1,1))
+        temp_mat[:] = np.nan
+        temp_mat = temp_mat.reshape(1,-1).tolist()[0]
+
+        last_original_days_value = temp_mat
+        next_predicted_days_value = temp_mat
+
+        last_original_days_value[0:time_step+1] = scaler.inverse_transform(close_values[len(close_values)-time_step:]).reshape(1,-1).tolist()[0]
+        next_predicted_days_value[time_step+1:] = scaler.inverse_transform(np.array(lst_output).reshape(-1,1)).reshape(1,-1).tolist()[0]
+
+        new_pred_plot = pd.DataFrame({
+            'last_original_days_value':last_original_days_value,
+            'next_predicted_days_value':next_predicted_days_value
+        })
+
+        names = cycle(['Last 15 days close price','Predicted next 30 days close price'])
+
+        fig = px.line(new_pred_plot,x=new_pred_plot.index, y=[new_pred_plot['last_original_days_value'],
+                                                            new_pred_plot['next_predicted_days_value']],
+                    labels={'value': 'Stock price','index': 'Timestamp'})
+        fig.update_layout(title_text='Compare last 15 days vs next 30 days',
+                        plot_bgcolor='white', font_size=15, font_color='black',legend_title_text='Close Price')
+
+        fig.for_each_trace(lambda t:  t.update(name = next(names)))
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
+        # fig.show()
+        fig.write_image(img_output_fix_pred)
+
+        lstmdf=close_values.tolist()
+        lstmdf.extend((np.array(lst_output).reshape(-1,1)).tolist())
+        lstmdf=scaler.inverse_transform(lstmdf).reshape(1,-1).tolist()[0]
+
+        names = cycle(['Close price'])
+
+        fig = px.line(lstmdf,labels={'value': 'Stock price','index': 'Timestamp'})
+        fig.update_layout(title_text='Plotting whole closing stock price with prediction',
+                        plot_bgcolor='white', font_size=15, font_color='black',legend_title_text='Stock')
+
+        fig.for_each_trace(lambda t:  t.update(name = next(names)))
+
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
+        # fig.show()
+        fig.write_image(img_output_fix_complete)
+
+        csv_dict = {'complete_close_value': lstmdf}
+        df_csv_dict = pd.DataFrame(csv_dict)
+        df_csv_dict.to_csv(csv_output)

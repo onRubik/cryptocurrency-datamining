@@ -1,0 +1,1 @@
+keep this folder, the project uses it to store flat files output

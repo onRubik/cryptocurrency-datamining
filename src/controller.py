@@ -10,9 +10,9 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_v
 from sklearn.metrics import mean_poisson_deviance, mean_gamma_deviance, accuracy_score
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.layers import LSTM
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import LSTM
 import matplotlib.pyplot as plt
 from itertools import cycle
 import plotly.graph_objects as go
@@ -181,7 +181,7 @@ class controller:
         print('train data = ', test_data.shape)
         
         # create the dataset matrix
-        time_step = 120
+        time_step = 30
         X_training, y_training = self.dataset_matrix(training_data, time_step)
         X_test, y_test = self.dataset_matrix(test_data, time_step)
         print('X_training = ', X_training.shape)
